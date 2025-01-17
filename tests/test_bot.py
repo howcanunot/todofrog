@@ -19,6 +19,7 @@ def mock_settings(mocker):
     mock_settings.DEV_MODE = True
     
     mocker.patch('src.bot.get_settings', return_value=mock_settings)
+    mocker.patch('database.get_settings', return_value=mock_settings)
 
 
 @pytest.fixture
