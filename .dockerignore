@@ -1,0 +1,13 @@
+.git
+.github
+.gitignore
+__pycache__
+.env
+.venv
+**/pytest_cache
+.vscode
+.coverage
+htmlcov/
+coverage.xml
+coverage.json
+test-results/
