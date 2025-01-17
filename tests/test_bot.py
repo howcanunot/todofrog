@@ -9,8 +9,16 @@ from src.messages import START_MESSAGE
 
 
 @pytest.fixture(autouse=True)
-def mock_settings(mocker):    
-    mocker.patch('src.bot.get_settings', return_value=MagicMock())
+def mock_settings(mocker):
+    mock_settings = MagicMock()
+    mock_settings.BOT_TOKEN = "test_token"
+    mock_settings.DB_URL = "test_db_url"
+    mock_settings.YANDEXGPT_API_KEY = "test_api_key"
+    mock_settings.YANDEX_CLOUD_FOLDER = "test_folder"
+    mock_settings.SSL_CERT_BASE64 = "test_cert"
+    mock_settings.DEV_MODE = True
+    
+    mocker.patch('src.bot.get_settings', return_value=mock_settings)
 
 
 @pytest.fixture
