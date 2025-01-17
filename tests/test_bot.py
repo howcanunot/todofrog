@@ -8,6 +8,11 @@ from src.bot import CreateTaskConversation
 from src.messages import START_MESSAGE
 
 
+@pytest.fixture(autouse=True)
+def mock_settings(mocker):    
+    mocker.patch('src.bot.get_settings', return_value=MagicMock())
+
+
 @pytest.fixture
 def update():
     update = MagicMock(spec=Update)
