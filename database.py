@@ -11,9 +11,12 @@ from settings import get_settings
 
 ssl_context = None
 if not get_settings().DEV_MODE:
-    cert_base64 = get_settings().SSL_CERT_BASE64
-    cert_data = base64.b64decode(cert_base64).decode()
-    ssl_context.load_verify_locations(cadata=cert_data)
+    # cert_base64 = get_settings().SSL_CERT_BASE64
+    # cert_data = base64.b64decode(cert_base64).decode()
+    # ssl_context.load_verify_locations(cadata=cert_data)
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
 
 
 async_engine = create_async_engine(
