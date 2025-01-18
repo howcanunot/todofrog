@@ -28,9 +28,10 @@ jobs:
         pytest --cov=./ --cov-report=xml --cov-report=html --html=test-results/report.html --junitxml=test-results/junit.xml
 
     - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        slug: howcanunot/todofrog
         fail_ci_if_error: true
 
     - name: Upload test results
