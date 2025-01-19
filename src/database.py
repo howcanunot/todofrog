@@ -1,12 +1,9 @@
-import base64
 from contextlib import asynccontextmanager
-from pathlib import Path
 import ssl
-from tempfile import NamedTemporaryFile
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-from settings import get_settings
+from src.settings import get_settings
 
 
 ssl_context = None
@@ -26,8 +23,8 @@ async_engine = create_async_engine(
 )
 
 async def create_tables() -> None:
-    from models.user import User
-    from models.task import Task
+    from src.models.user import User
+    from src.models.task import Task
     async with async_engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 

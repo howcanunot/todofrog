@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     YANDEX_CLOUD_FOLDER: str = ''
     SSL_CERT_BASE64: str = ''
     DEV_MODE: bool = True
+    WEBHOOK_URL: str = 'https://example.com'
 
     class Config:
         env_file = ".env"

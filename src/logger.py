@@ -25,10 +25,10 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         level_color = self.LEVEL_COLORS.get(record.levelname, COLORS['WHITE'])
         record.levelname = f"{level_color}{record.levelname:<5}{COLORS['RESET']}"
-        
+
         record_name = record.filename + ":" + str(record.lineno)
         record.name = f"{COLORS['CYAN']}{record_name:<12}{COLORS['RESET']}"
-        
+
         return super().format(record)
 
 def setup_logger():

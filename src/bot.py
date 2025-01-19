@@ -13,9 +13,9 @@ from telegram.ext import (
     filters,
 )
 
-from database import get_session
-from settings import get_settings
-from models.user import User
+from src.database import get_session
+from src.settings import get_settings
+from src.models.user import User
 
 from src.utils import delete_message
 from src.messages import START_MESSAGE, TASK_REPLY_MESSAGE
@@ -168,7 +168,12 @@ async def change_task_status_button_callback(update: Update, context: ContextTyp
 
 
 def start_bot():
-    app = Application.builder().token(get_settings().BOT_TOKEN).build()
+    app = Application.builder().token(get_settings().BOT_TOKEN) \
+        .get_updates_read_timeout(10.0) \
+        .get_updates_write_timeout(10.0) \
+        .get_updates_pool_timeout(30.0) \
+        .get_updates_connection_pool_size(50) \
+        .build()
 
     conv_handler = ConversationHandler(
         entry_points=[
@@ -196,4 +201,14 @@ def start_bot():
 
     app.add_handler(conv_handler)
 
-    app.run_polling()
+    if not get_settings().DEV_MODE:
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=8443,
+            webhook_url=get_settings().WEBHOOK_URL,
+            drop_pending_updates=True,
+        )
+    else:
+        app.run_polling(
+            drop_pending_updates=True,
+        )

@@ -1,6 +1,6 @@
 from yandex_cloud_ml_sdk import AsyncYCloudML
 
-from settings import get_settings
+from src.settings import get_settings
 
 
 GENERATE_EMOJI_PROMPT = {

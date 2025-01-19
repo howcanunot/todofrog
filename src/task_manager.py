@@ -1,8 +1,7 @@
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.task import Task, TaskStatus
-from database import get_session
+from src.models.task import Task, TaskStatus
 from src.llm_service import llm_service
 
 

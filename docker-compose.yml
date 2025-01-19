@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: bgsavko
+      POSTGRES_HOST: localhost
+      POSTGRES_PASSWORD: Playerdova322!!@
+      POSTGRES_DB: todofrog_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTH_TOKEN}
+    command: http bot:8443
+    ports:
+      - "4040:4040"
+
+  bot:
+    build: .
+    environment:
+      - DB_URL=${DB_URL}
+      - BOT_TOKEN=${BOT_TOKEN}
+      - YANDEXGPT_API_KEY=${YANDEXGPT_API_KEY}
+      - YANDEX_CLOUD_FOLDER=${YANDEX_CLOUD_FOLDER}
+      - SSL_CERT_BASE64=None
+      - DEV_MODE=True
+      - USE_WEBHOOK=True
+    ports:
+      - "8443:8443"
+    depends_on:
+      - postgres
+      - ngrok
+    volumes:
+      - .:/todofrog
+    command: >
+      sh -c "python -m src.database && python main.py"
+
+volumes:
+  postgres_data:
