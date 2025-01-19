@@ -206,7 +206,7 @@ def start_bot():
         app.run_webhook(
             listen="0.0.0.0",
             port=8443,
-            webhook_url="https://5d49-77-238-251-67.ngrok-free.app",
+            webhook_url=get_settings().webhook_url,
             drop_pending_updates=True,
         )
     else:
