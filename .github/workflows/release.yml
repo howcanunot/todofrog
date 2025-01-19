@@ -48,7 +48,7 @@ jobs:
     - name: Log in to Yandex Container Registry
       run: |
         docker login -u oauth \
-          --password "${{ secrets.YANDEX_OAUTH_TOKEN }}" \
+          --password "${{ secrets.YANDEX_CLOUD_OAUTH }}" \
           cr.yandex
 
     - name: Build Docker image
