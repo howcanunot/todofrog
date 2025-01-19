@@ -1,7 +1,9 @@
 from enum import Enum
 from importlib.resources import files
 import logging
+import os
 from pathlib import Path
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -16,7 +18,6 @@ from telegram.ext import (
 from src.database import get_session
 from src.settings import get_settings
 from src.models.user import User
-
 from src.utils import delete_message
 from src.messages import START_MESSAGE, TASK_REPLY_MESSAGE
 from src.user_manager import update_user_list_message_id
@@ -202,10 +203,11 @@ def start_bot():
     app.add_handler(conv_handler)
 
     if not get_settings().dev_mode or get_settings().use_webhook:
-        logging.info("Running bot with webhook...")
+        port = os.environ.get("PORT", 8080)
+        logging.info("Running bot with webhook on port %s...", port)
         app.run_webhook(
             listen="0.0.0.0",
-            port=8443,
+            port=port,
             webhook_url=get_settings().webhook_url,
             drop_pending_updates=True,
         )
