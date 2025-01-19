@@ -5,8 +5,7 @@ services:
     image: postgres:15
     environment:
       POSTGRES_USER: bgsavko
-      POSTGRES_HOST: localhost
-      POSTGRES_PASSWORD: Playerdova322!!@
+      POSTGRES_PASSWORD: 123456
       POSTGRES_DB: todofrog_dev
     ports:
       - "5432:5432"

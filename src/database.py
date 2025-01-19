@@ -7,7 +7,7 @@ from src.settings import get_settings
 
 
 ssl_context = None
-if not get_settings().DEV_MODE:
+if not get_settings().dev_mode:
     # cert_base64 = get_settings().SSL_CERT_BASE64
     # cert_data = base64.b64decode(cert_base64).decode()
     # ssl_context.load_verify_locations(cadata=cert_data)
@@ -17,7 +17,7 @@ if not get_settings().DEV_MODE:
 
 
 async_engine = create_async_engine(
-    get_settings().DB_URL,
+    get_settings().db_url,
     echo=False,
     connect_args={"ssl": ssl_context} if ssl_context else {},
 )

@@ -17,8 +17,8 @@ GENERATE_EMOJI_PROMPT = {
 class LLMService:
     def __init__(self):
         self.model = AsyncYCloudML(
-            folder_id=get_settings().YANDEX_CLOUD_FOLDER,
-            auth=get_settings().YANDEXGPT_API_KEY,
+            folder_id=get_settings().yandex_cloud_folder,
+            auth=get_settings().yandex_gpt_api_key,
         ).models.completions("yandexgpt").configure(temperature=0.3)
 
     async def generate_task_title(self, description: str) -> str:

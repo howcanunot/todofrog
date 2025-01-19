@@ -168,7 +168,7 @@ async def change_task_status_button_callback(update: Update, context: ContextTyp
 
 
 def start_bot():
-    app = Application.builder().token(get_settings().BOT_TOKEN) \
+    app = Application.builder().token(get_settings().bot_token) \
         .get_updates_read_timeout(10.0) \
         .get_updates_write_timeout(10.0) \
         .get_updates_pool_timeout(30.0) \
@@ -201,14 +201,16 @@ def start_bot():
 
     app.add_handler(conv_handler)
 
-    if not get_settings().DEV_MODE:
+    if not get_settings().dev_mode or get_settings().use_webhook:
+        logging.info("Running bot with webhook...")
         app.run_webhook(
             listen="0.0.0.0",
             port=8443,
-            webhook_url=get_settings().WEBHOOK_URL,
+            webhook_url="https://5d49-77-238-251-67.ngrok-free.app",
             drop_pending_updates=True,
         )
     else:
+        logging.info("Running bot with long polling...")
         app.run_polling(
             drop_pending_updates=True,
         )

@@ -3,13 +3,14 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DB_URL: str = 'postgresql+asyncpg://postgres:postgres@localhost:5432/postgres'
-    BOT_TOKEN: str = ''
-    YANDEXGPT_API_KEY: str = ''
-    YANDEX_CLOUD_FOLDER: str = ''
-    SSL_CERT_BASE64: str = ''
-    DEV_MODE: bool = True
-    WEBHOOK_URL: str = 'https://example.com'
+    db_url: str = 'postgresql+asyncpg://postgres:postgres@localhost:5432/postgres'
+    bot_token: str = ''
+    yandex_gpt_api_key: str = ''
+    yandex_cloud_folder: str = ''
+    ssl_cert_base64: str = ''
+    dev_mode: bool = True
+    use_webhook: bool = False
+    webhook_url: str = 'https://example.com'
 
     class Config:
         env_file = ".env"
