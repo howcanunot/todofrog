@@ -23,7 +23,7 @@ services:
   bot:
     build: .
     environment:
-      - DB_URL=${DB_URL}
+      - DB_URL=postgresql+asyncpg://bgsavko:123456@localhost:5432/todofrog_dev
       - BOT_TOKEN=${BOT_TOKEN}
       - YANDEXGPT_API_KEY=${YANDEXGPT_API_KEY}
       - YANDEX_CLOUD_FOLDER=${YANDEX_CLOUD_FOLDER}

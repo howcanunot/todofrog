@@ -18,6 +18,10 @@ if not get_settings().dev_mode:
 
 async_engine = create_async_engine(
     get_settings().db_url,
+    pool_size=5,
+    max_overflow=10,
+    pool_pre_ping=True,
+    pool_recycle=540,
     echo=False,
     connect_args={"ssl": ssl_context} if ssl_context else {},
 )
