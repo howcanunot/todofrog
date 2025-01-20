@@ -173,6 +173,7 @@ def start_bot():
         .get_updates_write_timeout(10.0) \
         .get_updates_pool_timeout(30.0) \
         .get_updates_connection_pool_size(50) \
+        .concurrent_updates(5) \
         .build()
 
     conv_handler = ConversationHandler(
@@ -209,7 +210,7 @@ def start_bot():
             port=port,
             url_path="webhook",
             webhook_url=get_settings().webhook_url,
-            drop_pending_updates=True,
+            drop_pending_updates=False,
         )
     else:
         logger.info("Running bot with long polling...")
