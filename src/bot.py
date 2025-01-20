@@ -1,6 +1,5 @@
 from enum import Enum
 from importlib.resources import files
-import logging
 import os
 from pathlib import Path
 
@@ -204,15 +203,16 @@ def start_bot():
 
     if not get_settings().dev_mode or get_settings().use_webhook:
         port = os.environ.get("PORT", 8080)
-        logging.info("Running bot with webhook on port %s...", port)
+        logger.info("Running bot with webhook on port %s...", port)
         app.run_webhook(
             listen="0.0.0.0",
             port=port,
+            webhook_path="/webhook",
             webhook_url=get_settings().webhook_url,
             drop_pending_updates=True,
         )
     else:
-        logging.info("Running bot with long polling...")
+        logger.info("Running bot with long polling...")
         app.run_polling(
             drop_pending_updates=True,
         )
