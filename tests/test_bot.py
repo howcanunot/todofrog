@@ -5,7 +5,12 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from src.bot import change_task_status_button_callback, description, start, create_task, get_list_tasks, task_button_callback
 from src.bot import CreateTaskConversation
-from src.messages import START_MESSAGE, ALL_TASKS_COMPLETED_MESSAGE
+from src.messages import (
+    START_MESSAGE,
+    ALL_TASKS_COMPLETED_MESSAGE,
+    TOO_MANY_TASKS_MESSAGE,
+    NO_TASKS_FOUND_MESSAGE,
+)
 
 
 @pytest.fixture
@@ -31,7 +36,7 @@ async def test_start_command(update, context):
     await start(update, context)
     
     # Verify that reply_text was called twice (for message and emoji)
-    assert update.message.reply_text.call_count == 2
+    assert update.message.reply_text.call_count == 1
     
     # Verify the first call had the START_MESSAGE
     first_call_args = update.message.reply_text.call_args_list[0]
@@ -51,8 +56,8 @@ async def test_create_task_command_limit_reached(update, context, mocker):
     result = await create_task(update, context)
     
     # Verify the result and message
-    assert result == CreateTaskConversation.FAILED
-    update.message.reply_text.assert_called_once_with("Кажется, у тебя накопилось слишком много задач")
+    assert result == ConversationHandler.END
+    update.message.reply_text.assert_called_once_with(TOO_MANY_TASKS_MESSAGE, parse_mode="Markdown")
 
 
 @pytest.mark.asyncio
@@ -68,7 +73,7 @@ async def test_get_list_tasks_empty(update, context, mocker):
     await get_list_tasks(update, context)
     
     # Verify the "no tasks" message was sent
-    update.message.reply_text.assert_called_once_with("You don't have any tasks yet!")
+    update.message.reply_text.assert_called_once_with(NO_TASKS_FOUND_MESSAGE)
 
 
 @pytest.mark.asyncio
