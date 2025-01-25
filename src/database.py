@@ -6,16 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from src.settings import get_settings
 
 
-ssl_context = None
-if not get_settings().dev_mode:
-    # cert_base64 = get_settings().SSL_CERT_BASE64
-    # cert_data = base64.b64decode(cert_base64).decode()
-    # ssl_context.load_verify_locations(cadata=cert_data)
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
-
 async_engine = create_async_engine(
     get_settings().db_url,
     pool_size=5,
@@ -23,12 +13,11 @@ async_engine = create_async_engine(
     pool_pre_ping=True,
     pool_recycle=540,
     echo=False,
-    connect_args={"ssl": ssl_context} if ssl_context else {},
+    connect_args=get_settings().db_connect_args,
 )
 
 async def create_tables() -> None:
-    from src.models.user import User
-    from src.models.task import Task
+    from src.models import User, Task
     async with async_engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 

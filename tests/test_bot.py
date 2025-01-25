@@ -3,9 +3,9 @@ from unittest.mock import AsyncMock, MagicMock
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
-from src.bot import description, start, create_task, get_list_tasks, task_button_callback
+from src.bot import change_task_status_button_callback, description, start, create_task, get_list_tasks, task_button_callback
 from src.bot import CreateTaskConversation
-from src.messages import START_MESSAGE
+from src.messages import START_MESSAGE, ALL_TASKS_COMPLETED_MESSAGE
 
 
 @pytest.fixture
@@ -134,6 +134,36 @@ async def test_delete_last_tasks_list_message(update, context, mocker):
     
     assert context.bot.delete_message.call_count == 2
     assert context.bot.delete_message.call_args_list[1].args[1] == 1
+
+
+@pytest.mark.asyncio
+async def test_delete_last_task(update, context, mocker):
+        # Mock the callback query
+    update.callback_query = AsyncMock()
+    update.callback_query.data = "123"  # Task ID
+    
+    # Mock the session and TaskManager
+    session_mock = AsyncMock()
+    task_manager_mock = AsyncMock()
+    task_manager_mock.get_task.return_value = MagicMock(description="Test task")
+    
+    mocker.patch('src.bot.get_session', return_value=AsyncMock(__aenter__=AsyncMock(return_value=session_mock)))
+    mocker.patch('src.bot.TaskManager', return_value=task_manager_mock)
+
+    await task_button_callback(update, context)
+    
+    update.callback_query.answer.assert_called_once()
+    context.bot.send_message.assert_called_once()
+    context.bot.delete_message.assert_called_once()
+
+    update.callback_query.data = "complete_123"
+    task_manager_mock.get_task_count.return_value = 0
+
+    await change_task_status_button_callback(update, context)
+
+    assert context.bot.send_message.call_count == 2
+    assert context.bot.send_message.call_args_list[1].args[1] == ALL_TASKS_COMPLETED_MESSAGE
+    assert context.bot.delete_message.call_count == 2
 
 
 @pytest.mark.asyncio

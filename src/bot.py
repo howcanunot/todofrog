@@ -18,7 +18,13 @@ from src.database import get_session
 from src.settings import get_settings
 from src.models.user import User
 from src.utils import delete_message
-from src.messages import START_MESSAGE, TASK_REPLY_MESSAGE
+from src.messages import (
+    START_MESSAGE,
+    TASK_REPLY_MESSAGE,
+    ALL_TASKS_COMPLETED_MESSAGE,
+    NO_TASKS_FOUND_MESSAGE,
+    TOO_MANY_TASKS_MESSAGE,
+)
 from src.user_manager import update_user_list_message_id
 from src.task_manager import TaskManager
 from src.logger import logger
@@ -37,8 +43,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         resize_keyboard=True,
         one_time_keyboard=False,
     )
-    await update.message.reply_text(START_MESSAGE, reply_markup=keyboard)
-    await update.message.reply_text("🐸")
+    await update.message.reply_text(
+        START_MESSAGE,
+        reply_markup=keyboard,
+        parse_mode="Markdown",
+    )
 
 
 async def create_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -46,9 +55,11 @@ async def create_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     async with get_session() as session:
         task_manager = TaskManager(session)
         if await task_manager.get_task_count(update.message.from_user.id) >= 5:
-            await update.message.reply_text("Кажется, у тебя накопилось слишком много задач")
-            return CreateTaskConversation.FAILED
+            logger.debug(f"User {update.message.from_user.id} has too many tasks. Creating task skipped")
+            await update.message.reply_text(TOO_MANY_TASKS_MESSAGE, parse_mode="Markdown")
+            return ConversationHandler.END
         else:
+            logger.debug(f"Waining for task description for user {update.message.from_user.id}")
             await update.message.reply_text("Напиши описание для своей задачи")
             return CreateTaskConversation.DESCRIPTION
         
@@ -93,7 +104,7 @@ async def get_list_tasks(
         tasks = await task_manager.get_pending_user_tasks(user_id)
         
         if not tasks:
-            await update.message.reply_text("You don't have any tasks yet!")
+            await update.message.reply_text(NO_TASKS_FOUND_MESSAGE)
             return
         
         logger.debug("Found %d for user %d", len(tasks), user_id)
@@ -159,12 +170,22 @@ async def change_task_status_button_callback(update: Update, context: ContextTyp
     query = update.callback_query
     action, task_id = query.data.split("_")
 
+    task_count = 0
     async with get_session() as session:
         task_manager = TaskManager(session)
         await task_manager.change_task_status(int(task_id), action)
+        task_count = await task_manager.get_task_count(update.effective_user.id)
 
-    await query.answer("Задача выполнена, так держать!")
-    await back_to_list_button_callback(update, context)
+    if task_count > 0:
+        await query.answer("Задача выполнена, так держать!")
+        await back_to_list_button_callback(update, context)
+    else:
+        await context.bot.send_message(
+            update.effective_chat.id,
+            ALL_TASKS_COMPLETED_MESSAGE,
+            parse_mode="Markdown"
+        )
+        await delete_message(update, context, query.message.message_id)
 
 
 def start_bot():
@@ -184,7 +205,7 @@ def start_bot():
         states={
             CreateTaskConversation.DESCRIPTION: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, description)
-            ]
+            ],
         },
         fallbacks=[
             CommandHandler('cancel', cancel),
@@ -202,7 +223,7 @@ def start_bot():
 
     app.add_handler(conv_handler)
 
-    if not get_settings().dev_mode or get_settings().use_webhook:
+    if not get_settings().dev_mode and get_settings().use_webhook:
         port = os.environ.get("PORT", 8080)
         logger.info("Running bot with webhook on port %s...", port)
         app.run_webhook(

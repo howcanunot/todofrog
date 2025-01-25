@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from src.settings import get_settings
 
 # ANSI escape codes for colors
 COLORS = {
@@ -22,17 +23,27 @@ class ColoredFormatter(logging.Formatter):
         'CRITICAL': COLORS['MAGENTA'],
     }
 
-    def format(self, record):
-        level_color = self.LEVEL_COLORS.get(record.levelname, COLORS['WHITE'])
-        record.levelname = f"{level_color}{record.levelname:<5}{COLORS['RESET']}"
+    def __init__(self, use_colors=True, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.use_colors = use_colors
 
-        record_name = record.filename + ":" + str(record.lineno)
-        record.name = f"{COLORS['CYAN']}{record_name:<12}{COLORS['RESET']}"
+    def format(self, record):
+        if self.use_colors:
+            level_color = self.LEVEL_COLORS.get(record.levelname, COLORS['WHITE'])
+            record.levelname = f"{level_color}{record.levelname:<5}{COLORS['RESET']}"
+            
+            record_name = record.filename + ":" + str(record.lineno)
+            record.name = f"{COLORS['CYAN']}{record_name:<12}{COLORS['RESET']}"
+        else:
+            record.levelname = f"{record.levelname:<5}"
+            record.name = f"{record.filename}:{record.lineno:<12}"
 
         return super().format(record)
 
 def setup_logger():
+    settings = get_settings()
     formatter = ColoredFormatter(
+        use_colors=settings.dev_mode,
         fmt='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )

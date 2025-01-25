@@ -1,6 +1,9 @@
 from datetime import datetime
-from sqlmodel import Field, SQLModel
+from typing import List
+
+from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import Column, DateTime, text
+
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -14,3 +17,5 @@ class User(SQLModel, table=True):
             server_default=text("CURRENT_TIMESTAMP")
         )
     )
+
+    tasks: List["Task"] = Relationship(back_populates="user")
