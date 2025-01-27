@@ -1,6 +1,5 @@
 import asyncio
 import pytest
-from freezegun import freeze_time
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy import select
 from telegram import Update
