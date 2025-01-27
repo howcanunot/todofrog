@@ -30,7 +30,8 @@ class Task(SQLModel, table=True):
         sa_column=Column(
             DateTime(timezone=True),
             nullable=False,
-            server_default=text("CURRENT_TIMESTAMP")
+            server_default=text("CURRENT_TIMESTAMP"),
+            onupdate=text("CURRENT_TIMESTAMP"),
         )
     )
     status: TaskStatus = Field(

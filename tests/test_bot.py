@@ -1,5 +1,8 @@
+import asyncio
 import pytest
+from freezegun import freeze_time
 from unittest.mock import AsyncMock, MagicMock
+from sqlalchemy import select
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
@@ -11,6 +14,8 @@ from src.messages import (
     TOO_MANY_TASKS_MESSAGE,
     NO_TASKS_FOUND_MESSAGE,
 )
+from src.models import User, Task
+from src.task_manager import TaskManager
 
 
 @pytest.fixture
@@ -212,3 +217,36 @@ async def test_delete_last_tasks_list_message_after_task_created(update, context
     assert update.message.reply_text.call_args_list[-1].args[0] == "Задача создана! 👋"    
     assert update_user_list_message_id_mock.call_args[0][3] == update.effective_message.message_id + 2
     assert context.bot.delete_message.call_args_list[1].args[1] == user_mock.list_message_id
+
+
+@pytest.mark.asyncio
+async def test_task_updated_at_changes(setup_test_db, test_session, mocker):
+    llm_service_mock = AsyncMock()
+    llm_service_mock.generate_task_emoji.return_value = "🐸"
+    mocker.patch('src.task_manager.llm_service', llm_service_mock)
+
+    test_user = User(telegram_id=12345, username="test_user")
+    test_session.add(test_user)
+    await test_session.commit()
+
+    task_manager = TaskManager(test_session)
+
+    await task_manager.create_task(
+        user_id=12345,
+        username="test_user",
+        description="Test task"
+    )
+
+    task = (await test_session.execute(
+        select(Task)
+        .where(Task.description == "Test task")
+    )).scalar_one()
+    
+    initial_updated_at = task.updated_at
+
+    await asyncio.sleep(1)
+
+    await task_manager.change_task_status(task.id, "complete")
+    await test_session.refresh(task)
+
+    assert task.updated_at > initial_updated_at
